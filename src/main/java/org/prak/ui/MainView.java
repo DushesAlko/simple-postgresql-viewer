@@ -2,51 +2,131 @@ package org.prak.ui;
 
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.cell.PropertyValueFactory;
 
+import org.prak.model.Biome;
 import org.prak.model.Item;
+import org.prak.model.Mob;
+import org.prak.model.WorldType;
+import org.prak.repository.BiomesRepository;
 import org.prak.repository.ItemRepository;
+import org.prak.repository.MobsRepository;
+import org.prak.repository.WorldTypeRepository;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.prak.util.Constants.UPDATE_BUTTON_TEXT;
 import static org.prak.util.Constants.VBOX_INDENT;
 
 public class MainView {
     private final VBox root = new VBox(VBOX_INDENT);
-    private final TableView<Item> table = new TableView<>();
+    private final StackPane tableContainer = new StackPane();
+
+    private final TableView<Item> itemTable = new TableView<>();
+    private final TableView<Mob> mobTable = new TableView<>();
+    private final TableView<Biome> biomeTable = new TableView<>();
+    private final TableView<WorldType> worldTypeTable = new TableView<>();
 
     public MainView() {
+        // Кнопки
+        Button itemButton = new Button("Items");
+        Button mobButton = new Button("Mobs");
+        Button biomeButton = new Button("Biomes");
+        Button worldTypeButton = new Button("World Types");
         Button loadButton = new Button(UPDATE_BUTTON_TEXT);
 
-        TableColumn<Item, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(data -> data.getValue().idProperty().asObject());
+        // Настройка всех таблиц
+        setupItemTable();
+        setupMobTable();
+        setupBiomeTable();
+        setupWorldTypeTable();
 
-        TableColumn<Item, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(data -> data.getValue().nameProperty());
+        // Добавляем все таблицы в контейнер
+        tableContainer.getChildren().addAll(itemTable, mobTable, biomeTable, worldTypeTable);
+        showTable(itemTable); // По умолчанию показываем Item
 
-        TableColumn<Item, String> typeColumn = new TableColumn<>("Type");
-        typeColumn.setCellValueFactory(data -> data.getValue().typeProperty());
-
-        TableColumn<Item, Integer> stackSizeColumn = new TableColumn<>("Stack Size");
-        stackSizeColumn.setCellValueFactory(data -> data.getValue().stackSizeProperty().asObject());
-
-        TableColumn<Item, Integer> durabilityColumn = new TableColumn<>("Durability");
-        durabilityColumn.setCellValueFactory(data -> data.getValue().durabilityProperty().asObject());
-
-        TableColumn<Item, Boolean> useableColumn = new TableColumn<>("Useable");
-        useableColumn.setCellValueFactory(data -> data.getValue().useableProperty());
-
-        TableColumn<Item, LocalDate> addedDateColumn = new TableColumn<>("Added Date");
-        addedDateColumn.setCellValueFactory(data -> data.getValue().addedDateProperty());
-        table.getColumns().addAll(idColumn, nameColumn, typeColumn, stackSizeColumn, durabilityColumn, useableColumn, addedDateColumn);
-        loadButton.setOnAction(e -> {
-            List<Item> items = ItemRepository.getAll();
-            table.setItems(FXCollections.observableArrayList(items));
+        // Действия по кнопкам
+        itemButton.setOnAction(e -> {
+            itemTable.setItems(FXCollections.observableArrayList(new ItemRepository().getAll()));
+            showTable(itemTable);
         });
-        root.getChildren().addAll(loadButton, table);
+
+        mobButton.setOnAction(e -> {
+            mobTable.setItems(FXCollections.observableArrayList(new MobsRepository().getAll()));
+            showTable(mobTable);
+        });
+
+        biomeButton.setOnAction(e -> {
+            biomeTable.setItems(FXCollections.observableArrayList(new BiomesRepository().getAll()));
+            showTable(biomeTable);
+        });
+
+        worldTypeButton.setOnAction(e -> {
+            worldTypeTable.setItems(FXCollections.observableArrayList(new WorldTypeRepository().getAll()));
+            showTable(worldTypeTable);
+        });
+
+        // Панель управления
+        ToolBar toolBar = new ToolBar(itemButton, mobButton, biomeButton, worldTypeButton, loadButton);
+        root.getChildren().addAll(toolBar, tableContainer);
     }
+
+    private void showTable(TableView<?> tableToShow) {
+        itemTable.setVisible(false);
+        mobTable.setVisible(false);
+        biomeTable.setVisible(false);
+        worldTypeTable.setVisible(false);
+        tableToShow.setVisible(true);
+    }
+
+    private void setupItemTable() {
+        itemTable.getColumns().addAll(
+                createColumn("ID", "id", Integer.class),
+                createColumn("Name", "name", String.class),
+                createColumn("Type", "type", String.class),
+                createColumn("Stack Size", "stackSize", Integer.class),
+                createColumn("Durability", "durability", Integer.class),
+                createColumn("Useable", "useable", Boolean.class),
+                createColumn("Added Date", "addedDate", LocalDate.class)
+        );
+    }
+
+    private void setupMobTable() {
+        mobTable.getColumns().addAll(
+                createColumn("ID", "id", Integer.class),
+                createColumn("Name", "name", String.class),
+                createColumn("Type", "type", String.class),
+                createColumn("Hostile", "hostile", Boolean.class),
+                createColumn("Biome ID", "biomeId", Integer.class),
+                createColumn("Spawn %", "spawnChance", Float.class)
+        );
+    }
+
+    private void setupBiomeTable() {
+        biomeTable.getColumns().addAll(
+                createColumn("ID", "id", Integer.class),
+                createColumn("Name", "name", String.class),
+                createColumn("Temperature", "temperature", Float.class),
+                createColumn("World Type ID", "worldTypeId", Integer.class)
+        );
+    }
+
+    private void setupWorldTypeTable() {
+        worldTypeTable.getColumns().addAll(
+                createColumn("ID", "id", Integer.class),
+                createColumn("Name", "name", String.class),
+                createColumn("Description", "description", String.class)
+        );
+    }
+
+    private <S, T> TableColumn<S, T> createColumn(String title, String property, Class<T> type) {
+        TableColumn<S, T> column = new TableColumn<>(title);
+        column.setCellValueFactory(new PropertyValueFactory<>(property));
+        return column;
+    }
+
     public VBox getRoot() {
         return root;
     }
