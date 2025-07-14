@@ -7,14 +7,14 @@ public class Biome {
     private final IntegerProperty id;
     private final StringProperty name;
     private final FloatProperty temperature;
-    private final IntegerProperty worldTypeID;
+    private final IntegerProperty worldTypeId;
 
 
     public Biome(int id, String name, int worldTypeID, float temperature) {
         this.id = new SimpleIntegerProperty(id);
         this.name = new SimpleStringProperty(name);
         this.temperature = new SimpleFloatProperty(temperature);
-        this.worldTypeID = new SimpleIntegerProperty(worldTypeID);
+        this.worldTypeId = new SimpleIntegerProperty(worldTypeID);
     }
 
     public int getId() { return id.get(); }
@@ -32,11 +32,11 @@ public class Biome {
         return temperature;
     }
 
-    public int getWorldTypeID() {
-        return worldTypeID.get();
+    public int getWorldTypeId() {
+        return worldTypeId.get();
     }
 
-    public IntegerProperty worldTypeIDProperty() {
-        return worldTypeID;
+    public IntegerProperty worldTypeIdProperty() {
+        return worldTypeId;
     }
 }

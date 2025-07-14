@@ -1,7 +1,9 @@
 package org.prak.ui;
 
 import javafx.collections.FXCollections;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -17,7 +19,6 @@ import org.prak.repository.WorldTypeRepository;
 
 import java.time.LocalDate;
 
-import static org.prak.util.Constants.UPDATE_BUTTON_TEXT;
 import static org.prak.util.Constants.VBOX_INDENT;
 
 public class MainView {
@@ -35,7 +36,7 @@ public class MainView {
         Button mobButton = new Button("Mobs");
         Button biomeButton = new Button("Biomes");
         Button worldTypeButton = new Button("World Types");
-        Button loadButton = new Button(UPDATE_BUTTON_TEXT);
+
 
         // Настройка всех таблиц
         setupItemTable();
@@ -47,30 +48,38 @@ public class MainView {
         tableContainer.getChildren().addAll(itemTable, mobTable, biomeTable, worldTypeTable);
         showTable(itemTable); // По умолчанию показываем Item
 
+        itemTable.setItems(FXCollections.observableArrayList(new ItemRepository().getAll()));
+        mobTable.setItems(FXCollections.observableArrayList(new MobsRepository().getAll()));
+        biomeTable.setItems(FXCollections.observableArrayList(new BiomesRepository().getAll()));
+        worldTypeTable.setItems(FXCollections.observableArrayList(new WorldTypeRepository().getAll()));
+
+        itemTable.setVisible(false);
+        mobTable.setVisible(false);
+        biomeTable.setVisible(false);
+        worldTypeTable.setVisible(false);
+
         // Действия по кнопкам
         itemButton.setOnAction(e -> {
-            itemTable.setItems(FXCollections.observableArrayList(new ItemRepository().getAll()));
             showTable(itemTable);
         });
 
         mobButton.setOnAction(e -> {
-            mobTable.setItems(FXCollections.observableArrayList(new MobsRepository().getAll()));
             showTable(mobTable);
         });
 
         biomeButton.setOnAction(e -> {
-            biomeTable.setItems(FXCollections.observableArrayList(new BiomesRepository().getAll()));
             showTable(biomeTable);
         });
 
         worldTypeButton.setOnAction(e -> {
-            worldTypeTable.setItems(FXCollections.observableArrayList(new WorldTypeRepository().getAll()));
             showTable(worldTypeTable);
         });
 
         // Панель управления
-        ToolBar toolBar = new ToolBar(itemButton, mobButton, biomeButton, worldTypeButton, loadButton);
-        root.getChildren().addAll(toolBar, tableContainer);
+        ToolBar toolBar = new ToolBar(itemButton, mobButton, biomeButton, worldTypeButton);
+        HBox toolbarContainer = new HBox(toolBar);
+        toolbarContainer.setAlignment(Pos.CENTER);
+        root.getChildren().addAll(toolbarContainer, tableContainer);
     }
 
     private void showTable(TableView<?> tableToShow) {
